@@ -4,6 +4,7 @@ const Twit = require('twit');
 const fetch = require('node-fetch')
 const config = require('./keys');
 const { TwitterApi } = require('twitter-api-v2');
+const { getImageCheerio } = require('./image');
 const axios = require('axios');
 
 const rule = new schedule.RecurrenceRule();
@@ -50,7 +51,7 @@ const startStream = () => {
     });
 }
 
-const initTwitter =  () => {
+const initTwitter = () => {
     const mainClient = new TwitterApi(config.BEARER);
     const userClient = new TwitterApi({
         appKey: config.API_KEY,
@@ -108,12 +109,22 @@ const setUpBookTweet = async () => {
 
     const imageLink = `https://archive.org/download/${randomBook.identifier}/page/n${Math.floor(Math.random() * randomBook.imagecount)}.jpg`;
     const image = await axios.get(imageLink, { responseType: 'arraybuffer' });
+
     const imageBuffer = Buffer.from(image.data);
 
     const mediaId = await client.user.v1.uploadMedia(imageBuffer, { mimeType: 'image/png' });
-   return await client.user.v1.tweet(randomBook.title, { media_ids: [mediaId] });
+    return await client.user.v1.tweet(randomBook.title, { media_ids: [mediaId] });
 }
+const setUpHowTo = async (howTo) => {
+    const client = initTwitter();
 
-setUpBookTweet()
-.then(res => console.log("done", res))
-.catch(err => console.log("unable to tweet", err))
+    for (let item of howTo) {
+
+        const image = await axios.get(item.url, { responseType: 'arraybuffer' });
+        const imageBuffer = Buffer.from(image.data);
+        const mediaId = await client.user.v1.uploadMedia(imageBuffer, { mimeType: 'image/jpeg' });
+        await client.user.v1.tweet(item.title, { media_ids: [mediaId] });
+    }
+
+}
+getImageCheerio().then(item => setUpHowTo(item)).then(x => console.log('done')).catch(err => console.log(err, 'oops'));
