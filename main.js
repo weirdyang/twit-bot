@@ -17,13 +17,16 @@ const twitConfig = {
     access_token: config.USER_TOKEN,
     access_token_secret: config.USER_SECRET,
 };
-const T = new Twit({
-    consumer_key: config.API_KEY,
-    consumer_secret: config.API_SECRET,
-    app_only_auth: true,
-})
-const userT = new Twit(twitConfig);
+
+
 const getQuote = async () => {
+    const T = new Twit({
+        consumer_key: config.API_KEY,
+        consumer_secret: config.API_SECRET,
+        app_only_auth: true,
+    })
+    const userT = new Twit(twitConfig);
+
     const response = await fetch('https://motivational-quote-api.herokuapp.com/quotes/random');
     const { quote } = await response.json();
     userT.post('statuses/update', { status: quote ?? 'hello world' }, function (err, data, response) {
@@ -32,22 +35,17 @@ const getQuote = async () => {
 };
 
 const getFollowers = () => {
+    const T = new Twit({
+        consumer_key: config.API_KEY,
+        consumer_secret: config.API_SECRET,
+        app_only_auth: true,
+    });
+
     T.get('followers/list', { screen_name: config.SCREEN_NAME }, function (err, data, response) {
         const { users } = data;
         console.log(users);
         T.get("statuses/user_timeline", { screen_name: users[0].screen_name, count: 1 }, function (err, data, response) {
             console.log(data, 'in timeline'); // Whatever you want to do here
-        });
-    });
-}
-
-const startStream = () => {
-    T.post('followers/ids', { screen_name: config.SCREEN_NAME }, function (err, data, response) {
-        const { ids } = data;
-        var stream = T.stream('statuses/sample');
-
-        stream.on('tweet', (tweet) => {
-            console.log(tweet)
         });
     });
 }
@@ -65,18 +63,7 @@ const initTwitter = () => {
         user: userClient
     }
 }
-const uploadImage = async (buffer) => {
-    // First, post all your images to Twitter
-    const mediaIds = await Promise.all([
-        // file path
-        client.v1.uploadMedia('./my-image.jpg'),
-        // from a buffer, for example obtained with an image modifier package
-        client.v1.uploadMedia(buffer, { type: 'png' }),
-    ]);
 
-    // mediaIds is a string[], can be given to .tweet
-    await client.v1.tweet('My tweet text with two images!', { media_ids: mediaIds });
-}
 const requestRandomBook = async () => {
     const randomNumPages = Math.floor(Math.random() * 1500 + 1);
     const randomYear = 1440 + Math.floor(Math.random() * 580);
