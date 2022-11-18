@@ -20,11 +20,6 @@ const twitConfig = {
 
 
 const getQuote = async () => {
-    const T = new Twit({
-        consumer_key: config.API_KEY,
-        consumer_secret: config.API_SECRET,
-        app_only_auth: true,
-    })
     const userT = new Twit(twitConfig);
 
     const response = await fetch('https://motivational-quote-api.herokuapp.com/quotes/random');
@@ -50,14 +45,17 @@ const getFollowers = () => {
     });
 }
 
+const createClientV2 = () =>  new TwitterApi(config.BEARER);
+
+const createUserClient = () => new TwitterApi({
+    appKey: config.API_KEY,
+    appSecret: config.API_SECRET,
+    accessToken: config.USER_TOKEN,
+    accessSecret: config.USER_SECRET,
+})
 const initTwitter = () => {
-    const mainClient = new TwitterApi(config.BEARER);
-    const userClient = new TwitterApi({
-        appKey: config.API_KEY,
-        appSecret: config.API_SECRET,
-        accessToken: config.USER_TOKEN,
-        accessSecret: config.USER_SECRET,
-    })
+    const mainClient = createClientV2();
+    const userClient = createUserClient();
     return {
         main: mainClient,
         user: userClient
@@ -101,7 +99,7 @@ const setUpBookTweet = async () => {
     const imageBuffer = Buffer.from(image.data);
 
     const mediaId = await client.user.v1.uploadMedia(imageBuffer, { mimeType: 'image/png' });
-    return await client.user.v1.tweet(randomBook.title, { media_ids: [mediaId] });
+    return await client.user.v1.tweet(tweet, { media_ids: [mediaId] });
 }
 const setUpHowTo = async (howTo) => {
     const client = initTwitter();
