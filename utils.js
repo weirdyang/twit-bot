@@ -1,0 +1,1 @@
+exports.randomIndex = (array) => Math.floor(Math.random() * array.length);

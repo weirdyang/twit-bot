@@ -1,11 +1,10 @@
 const axios = require("axios");
 const cheerio = require("cheerio");
-
+const { randomIndex } = require("./utils");
 const wikihowUrl = (limit = 10) => `https://www.wikihow.com/api.php?format=json&action=query&list=random&rnnamespace=0&rnlimit=${limit}`;
 
 const imageUrl = (id) => `https://www.wikihow.com/api.php?format=json&action=parse&prop=images&pageid=${id}`;
 
-const randomIndex = (array) => Math.floor(Math.random() * array.length);
 
 const fileUrl = (image) => `https://www.wikihow.com/api.php?format=json&action=query&titles=File:${image}&prop=imageinfo&iiprop=url`;
 

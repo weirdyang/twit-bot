@@ -6,6 +6,7 @@ const config = require('./keys');
 const { TwitterApi } = require('twitter-api-v2');
 const { getImageCheerio } = require('./image');
 const axios = require('axios');
+const { getAsterixImage } = require('./asterix');
 
 const rule = new schedule.RecurrenceRule();
 rule.hour = 0;
@@ -127,4 +128,13 @@ const setUpHowTo = async (howTo) => {
     }
 
 }
-getImageCheerio().then(item => setUpHowTo(item)).then(x => console.log('done')).catch(err => console.log(err, 'oops'));
+
+const postImage = async (imageUrl) => {
+    const client = initTwitter();
+
+    const image = await axios.get(imageUrl, { responseType: 'arraybuffer' });
+    const imageBuffer = Buffer.from(image.data);
+    const mediaId = await client.user.v1.uploadMedia(imageBuffer, { mimeType: 'image/jpeg' });
+    await client.user.v1.tweet("Hello", { media_ids: [mediaId] });
+}
+getAsterixImage().then(url => postImage(url));
