@@ -1,7 +1,5 @@
-const fetch = require("node-fetch");
 const axios = require("axios");
 const cheerio = require("cheerio");
-const { ElementType } = require("htmlparser2");
 
 const wikihowUrl = (limit = 10) => `https://www.wikihow.com/api.php?format=json&action=query&list=random&rnnamespace=0&rnlimit=${limit}`;
 
@@ -10,6 +8,7 @@ const imageUrl = (id) => `https://www.wikihow.com/api.php?format=json&action=par
 const randomIndex = (array) => Math.floor(Math.random() * array.length);
 
 const fileUrl = (image) => `https://www.wikihow.com/api.php?format=json&action=query&titles=File:${image}&prop=imageinfo&iiprop=url`;
+
 exports.getImage = async () => {
 
     const response = await axios.get(wikihowUrl());
@@ -71,6 +70,5 @@ exports.getImageCheerio = async () => {
         }
 
     };
-    console.log(images, 'images')
     return images.filter(Boolean);
 }
