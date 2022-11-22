@@ -16,3 +16,6 @@ exports.getAsterixImage = async () => {
     const urls = images.filter(x => x.attribs.src.includes('jpg')).map(x => x.attribs.src);
     return urls[randomIndex(urls)];
 }
+exports.getImageFromFolder = async () => {
+    
+}

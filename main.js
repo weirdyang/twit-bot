@@ -7,6 +7,7 @@ const { TwitterApi } = require('twitter-api-v2');
 const { getImageCheerio } = require('./image');
 const axios = require('axios');
 const { getAsterixImage } = require('./asterix');
+const fs = require('fs');
 
 const rule = new schedule.RecurrenceRule();
 rule.hour = 0;
@@ -45,7 +46,7 @@ const getFollowers = () => {
     });
 }
 
-const createClientV2 = () =>  new TwitterApi(config.BEARER);
+const createClientV2 = () => new TwitterApi(config.BEARER);
 
 const createUserClient = () => new TwitterApi({
     appKey: config.API_KEY,
@@ -53,7 +54,7 @@ const createUserClient = () => new TwitterApi({
     accessToken: config.USER_TOKEN,
     accessSecret: config.USER_SECRET,
 })
-const initTwitter = () => {
+const initTwitter = async () => {
     const mainClient = createClientV2();
     const userClient = createUserClient();
     return {
@@ -61,7 +62,22 @@ const initTwitter = () => {
         user: userClient
     }
 }
+const initTwitterPromise = async () => {
+    return new Promise((resolve, reject) => {
+        try {
+            const mainClient = createClientV2();
+            const userClient = createUserClient();
+            return resolve(
+                {
+                    main: mainClient,
+                    user: userClient
+                })
+        } catch (error) {
 
+        } return reject(error)
+
+    })
+}
 const requestRandomBook = async () => {
     const randomNumPages = Math.floor(Math.random() * 1500 + 1);
     const randomYear = 1440 + Math.floor(Math.random() * 580);
@@ -122,4 +138,16 @@ const postImage = async (imageUrl) => {
     const mediaId = await client.user.v1.uploadMedia(imageBuffer, { mimeType: 'image/jpeg' });
     await client.user.v1.tweet("Hello", { media_ids: [mediaId] });
 }
-getAsterixImage().then(url => postImage(url));
+
+const postImageFromFolder = async (imageFolder, client) => {
+    const fs = require("fs");
+    const images = fs.readdirSync(imageFolder);
+    if (images.length) {
+        for (const item of images) {
+            console.log(item);
+            const mediaId = await client.user.v1.uploadMedia(`${imageFolder}${item}`, { mimeType: 'image/jpeg' });
+            await client.user.v1.tweet("", { media_ids: [mediaId] });
+        }
+    }
+}
+initTwitterPromise().then(client => postImageFromFolder('./comics/test/', client)).catch(err => console.log(err));
